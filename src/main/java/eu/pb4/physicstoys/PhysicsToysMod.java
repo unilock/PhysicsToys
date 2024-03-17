@@ -1,6 +1,7 @@
 package eu.pb4.physicstoys;
 
 import com.mojang.logging.LogUtils;
+import dev.lazurite.rayon.impl.Rayon;
 import eu.pb4.physicstoys.registry.USRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -18,6 +19,8 @@ public class PhysicsToysMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        Rayon.initialize();
+
         USRegistry.register();
     }
 }

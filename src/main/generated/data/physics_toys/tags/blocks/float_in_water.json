@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#minecraft:replaceable_plants",
+      "id": "#minecraft:replaceable",
       "required": false
     },
     {

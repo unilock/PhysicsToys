@@ -4,7 +4,11 @@ import eu.pb4.physicstoys.other.PhysicalExplosion;
 import eu.pb4.physicstoys.registry.USRegistry;
 import eu.pb4.polymer.virtualentity.api.elements.BlockDisplayElement;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Ownable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -50,14 +54,14 @@ public class PhysicalTntEntity extends BlockPhysicsEntity implements Ownable {
         ((BlockDisplayElement) this.mainDisplayElement).setBlockState(this.fuse / 5 % 2 == 0 ? Blocks.WHITE_CONCRETE.getDefaultState() : Blocks.TNT.getDefaultState());
         if (i <= 0) {
             this.discard();
-            if (!this.world.isClient) {
+            if (!this.getWorld().isClient) {
                 this.explode();
             }
         } else {
             this.updateWaterState();
-            if (this.world.isClient) {
+            if (this.getWorld().isClient) {
             }
-            ((ServerWorld) this.world).spawnParticles(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.25D, this.getZ(), 0, 0.0D, 0.0D, 0.0D, 0);
+            ((ServerWorld) this.getWorld()).spawnParticles(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.25D, this.getZ(), 0, 0.0D, 0.0D, 0.0D, 0);
         }
 
     }
@@ -65,7 +69,7 @@ public class PhysicalTntEntity extends BlockPhysicsEntity implements Ownable {
     private void explode() {
         float f = 5F;
 
-        Explosion explosion = new PhysicalExplosion(this.world, this, null, null, this.getX(), this.getY(), this.getZ(), f, false, Explosion.DestructionType.DESTROY_WITH_DECAY);
+        Explosion explosion = new PhysicalExplosion(this.getWorld(), this, null, null, this.getX(), this.getY(), this.getZ(), f, false, Explosion.DestructionType.DESTROY_WITH_DECAY);
         explosion.collectBlocksAndDamageEntities();
         explosion.affectWorld(true);
 

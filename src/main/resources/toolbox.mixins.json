@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.lazurite.toolbox.impl.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "common.BlockStateBaseMixin",
+    "common.EntityCallbacksMixin",
+    "common.LevelMixin",
+    "common.MinecraftServerMixin",
+    "common.PlayerListMixin",
+    "common.ServerEntityMixin",
+    "common.ServerCommonPacketListenerImplMixin",
+    "common.ServerLevelMixin",
+    "common.access.IChunkMapMixin",
+    "common.access.ITrackedEntityMixin"
+  ],
+  "client": [
+    "client.ClientCommonPacketListenerImplMixin",
+    "client.ClientLevelMixin",
+    "client.ClientPacketListenerMixin",
+    "client.EntityCallbacksMixin",
+    "client.LevelRendererMixin",
+    "client.MinecraftMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

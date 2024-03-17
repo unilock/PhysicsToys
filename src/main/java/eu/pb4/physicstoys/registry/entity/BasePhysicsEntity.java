@@ -5,20 +5,15 @@ import com.mojang.authlib.GameProfile;
 import dev.lazurite.rayon.api.EntityPhysicsElement;
 import dev.lazurite.rayon.impl.bullet.collision.body.ElementRigidBody;
 import dev.lazurite.rayon.impl.bullet.collision.body.EntityRigidBody;
-import dev.lazurite.rayon.impl.bullet.collision.space.supplier.entity.EntitySupplier;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import eu.pb4.physicstoys.registry.item.PhysicsEntityInteractor;
-import eu.pb4.physicstoys.registry.item.PhysicsGunItem;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.VirtualEntityUtils;
 import eu.pb4.polymer.virtualentity.api.attachment.EntityAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.DisplayElement;
 import eu.pb4.polymer.virtualentity.api.elements.InteractionElement;
-import eu.pb4.polymer.virtualentity.api.elements.MarkerElement;
 import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Ownable;
@@ -30,18 +25,15 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.EntityTrackingListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Set;
@@ -98,17 +90,12 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
     }
 
     @Override
-    public boolean sendEmptyTrackerUpdates() {
-        return true;
-    }
-
-    @Override
     public void setPosition(double x, double y, double z) {
         super.setPosition(x, y, z);
     }
 
     @Override
-    public void onEntityTrackerTick(Set<EntityTrackingListener> listeners) {
+    public void onEntityTrackerTick(Set<PlayerAssociatedNetworkHandler> listeners) {
         var rot = Convert.toMinecraft(this.getPhysicsRotation(this.storedQuad, 0));
         var trans = new org.joml.Vector3f(-0.5f, -0.5f, -0.5f).rotate(rot);
         this.mainDisplayElement.setLeftRotation(rot);
@@ -196,7 +183,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
 
         final var vanillaBox = rigidBody.getCurrentMinecraftBoundingBox();
 
-            final var entityPos = Convert.toBullet(entity.getPos().add(0, entity.getBoundingBox().getYLength(), 0));
+            final var entityPos = Convert.toBullet(entity.getPos().add(0, entity.getBoundingBox().getLengthY(), 0));
             final var normal = location.subtract(entityPos).multLocal(new Vector3f(1, 0, 1)).normalize();
 
             final var intersection = entity.getBoundingBox().intersection(vanillaBox);
@@ -278,7 +265,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
     @Nullable
     @Override
     public Entity getOwner() {
-        return ((ServerWorld) this.world).getEntity(this.owner);
+        return ((ServerWorld) this.getWorld()).getEntity(this.owner);
     }
 
     public void setOwner(UUID owner) {

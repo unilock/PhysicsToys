@@ -29,7 +29,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 public class PhysicalExplosion extends Explosion {
     private final World world;
@@ -41,7 +40,7 @@ public class PhysicalExplosion extends Explosion {
     private final GameProfile playerProfile;
 
     public PhysicalExplosion(World world, @Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, DestructionType destructionType) {
-        super(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType);
+        super(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.ENTITY_GENERIC_EXPLODE);
         this.world = world;
         this.power = power;
         this.x = x;
@@ -70,7 +69,7 @@ public class PhysicalExplosion extends Explosion {
                 BlockPos blockPos = (BlockPos) var5.next();
                 BlockState blockState = this.world.getBlockState(blockPos);
                 Block block = blockState.getBlock();
-                if (!blockState.isAir() && !blockState.isIn(BlockTags.REPLACEABLE_PLANTS)) {
+                if (!blockState.isAir() && !blockState.isIn(BlockTags.REPLACEABLE)) {
                     var vec = Vec3d.ofCenter(blockPos).subtract(this.x, this.y, this.z);
 
                     var l = vec.length();
@@ -80,7 +79,7 @@ public class PhysicalExplosion extends Explosion {
                     if (vec.lengthSquared() > 1) {
                         this.world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), 3);
                         block.onDestroyedByExplosion(this.world, blockPos, this);
-                        if (!blockState.isOf(Blocks.TNT) && !blockState.isOf(USRegistry.PHYSICAL_TNT_BLOCK) && !blockState.isIn(BlockTags.REPLACEABLE_PLANTS)
+                        if (!blockState.isOf(Blocks.TNT) && !blockState.isOf(USRegistry.PHYSICAL_TNT_BLOCK) && !blockState.isIn(BlockTags.REPLACEABLE)
                                 && CommonProtection.canBreakBlock(this.world, blockPos, this.playerProfile, this.player)) {
                             var e = BlockPhysicsEntity.create(world, blockState, blockPos);
                             e.setDespawnTimer(20 * 5);
