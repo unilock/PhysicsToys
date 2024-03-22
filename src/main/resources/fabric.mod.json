@@ -22,7 +22,8 @@
     ],
     "fabric-datagen": [
       "eu.pb4.physicstoys.datagen.DataGenInit"
-    ]
+    ],    "preLaunch": ["eu.pb4.physicstoys.other.CardboardWarning"]
+
   },
   "mixins": [
     "physictoys.mixins.json"

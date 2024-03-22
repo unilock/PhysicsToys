@@ -1,5 +1,8 @@
 package eu.pb4.physicstoys.registry.entity;
 
+import com.jme3.math.Vector3f;
+import com.simsilica.mathd.Vec3d;
+import dev.lazurite.rayon.impl.bullet.collision.body.ElementRigidBody;
 import eu.pb4.physicstoys.other.PhysicalExplosion;
 import eu.pb4.physicstoys.registry.USRegistry;
 import eu.pb4.polymer.virtualentity.api.elements.BlockDisplayElement;
@@ -23,6 +26,10 @@ public class PhysicalTntEntity extends BlockPhysicsEntity implements Ownable {
         super((EntityType<BlockPhysicsEntity>) (Object) entityType, world);
         this.intersectionChecked = true;
         this.setBlockState(Blocks.TNT.getDefaultState());
+        this.getRigidBody().setMass(8);
+        this.getRigidBody().setBuoyancyType(ElementRigidBody.BuoyancyType.NONE);
+        //this.getRigidBody().setProtectGravity(true);
+        //this.getRigidBody().setGravity(new Vector3f(0, 10f, 0));
     }
 
     public static PhysicalTntEntity of(World world, double x, double y, double z, @Nullable LivingEntity igniter) {
@@ -34,6 +41,11 @@ public class PhysicalTntEntity extends BlockPhysicsEntity implements Ownable {
         self.prevZ = z;
         self.causingEntity = igniter;
         return self;
+    }
+
+    @Override
+    protected void recalculateProperties() {
+
     }
 
     protected MoveEffect getMoveEffect() {

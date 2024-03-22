@@ -18,6 +18,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -54,7 +55,7 @@ public class PhysicalExplosion extends Explosion {
 
     @Override
     public void affectWorld(boolean particles) {
-        this.world.playSound(this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F, false);
+        ((ServerWorld) this.world).playSound(null, this.x, this.y, this.z, Registries.SOUND_EVENT.getEntry(SoundEvents.ENTITY_GENERIC_EXPLODE), SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F, this.world.random.nextLong());
 
         boolean bl = this.shouldDestroy();
         ((ServerWorld) this.world).spawnParticles(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 0, 1.0D, 0.0D, 0.0D, 1);
