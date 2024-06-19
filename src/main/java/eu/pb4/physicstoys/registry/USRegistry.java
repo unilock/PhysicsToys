@@ -13,7 +13,6 @@ import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import eu.pb4.polymer.core.api.item.PolymerBlockItem;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
@@ -28,8 +27,8 @@ import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 
 public class USRegistry {
-    public static final EntityType<BlockPhysicsEntity> BLOCK_ENTITY = register("block", FabricEntityTypeBuilder.create(SpawnGroup.MISC, BlockPhysicsEntity::new).trackRangeChunks(7).trackedUpdateRate(1).build(), Registries.ENTITY_TYPE);
-    public static final EntityType<PhysicalTntEntity> TNT_ENTITY = register("tnt", FabricEntityTypeBuilder.create(SpawnGroup.MISC,  PhysicalTntEntity::new).trackRangeChunks(7).trackedUpdateRate(1).build(), Registries.ENTITY_TYPE);
+    public static final EntityType<BlockPhysicsEntity> BLOCK_ENTITY = register("block", EntityType.Builder.create(BlockPhysicsEntity::new, SpawnGroup.MISC).maxTrackingRange(7).trackingTickInterval(1).build(), Registries.ENTITY_TYPE);
+    public static final EntityType<PhysicalTntEntity> TNT_ENTITY = register("tnt", EntityType.Builder.create(PhysicalTntEntity::new, SpawnGroup.MISC).maxTrackingRange(7).trackingTickInterval(1).build(), Registries.ENTITY_TYPE);
 
     public static final Item PHYSICATOR_ITEM = register("physicator", new PhysicatorItem(new Item.Settings().maxCount(1)), Registries.ITEM);
     public static final Item PHYSICS_GUN_ITEM = register("gravity_gun", new PhysicsGunItem(new Item.Settings().maxCount(1)), Registries.ITEM);

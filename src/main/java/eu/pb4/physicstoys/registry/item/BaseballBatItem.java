@@ -21,7 +21,6 @@ public class BaseballBatItem extends Item implements PolymerItem, PhysicsEntityI
         return Items.STICK;
     }
 
-
     @Override
     public void onInteractWith(PlayerEntity player, ItemStack stack, Vec3d hitPos, BasePhysicsEntity basePhysics) {
     }

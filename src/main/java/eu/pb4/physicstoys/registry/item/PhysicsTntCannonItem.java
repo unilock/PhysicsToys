@@ -16,7 +16,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class PhysicsTntCannonItem extends Item implements PolymerItem {
-
     public PhysicsTntCannonItem(Settings settings) {
         super(settings);
     }

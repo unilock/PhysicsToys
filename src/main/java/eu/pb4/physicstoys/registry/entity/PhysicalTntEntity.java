@@ -32,7 +32,7 @@ public class PhysicalTntEntity extends BlockPhysicsEntity implements Ownable {
     public static PhysicalTntEntity of(World world, double x, double y, double z, @Nullable LivingEntity igniter) {
         var self = new PhysicalTntEntity(USRegistry.TNT_ENTITY, world);
         self.setPosition(x, y, z);
-        self.setFuse(80);
+        self.setFuse(DEFAULT_FUSE);
         self.prevX = x;
         self.prevY = y;
         self.prevZ = z;
@@ -59,8 +59,6 @@ public class PhysicalTntEntity extends BlockPhysicsEntity implements Ownable {
             }
         } else {
             this.updateWaterState();
-            if (this.getWorld().isClient) {
-            }
             ((ServerWorld) this.getWorld()).spawnParticles(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.25D, this.getZ(), 0, 0.0D, 0.0D, 0.0D, 0);
         }
 

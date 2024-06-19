@@ -31,7 +31,7 @@ public class DataGenInit implements DataGeneratorEntrypoint {
         pack.addProvider(Recipes::new);
     }
 
-    class CBlockTags extends FabricTagProvider.BlockTagProvider {
+    private static class CBlockTags extends FabricTagProvider.BlockTagProvider {
         public CBlockTags(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
             super(output, registriesFuture);
         }
@@ -68,7 +68,7 @@ public class DataGenInit implements DataGeneratorEntrypoint {
         }
     }
 
-    class LootTables extends FabricBlockLootTableProvider {
+    private static class LootTables extends FabricBlockLootTableProvider {
         protected LootTables(FabricDataOutput dataOutput) {
             super(dataOutput);
         }
@@ -79,7 +79,7 @@ public class DataGenInit implements DataGeneratorEntrypoint {
         }
     }
 
-    class Recipes extends FabricRecipeProvider {
+    private static class Recipes extends FabricRecipeProvider {
         public Recipes(FabricDataOutput output) {
             super(output);
         }
