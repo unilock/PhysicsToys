@@ -10,9 +10,6 @@
     "common.entity.ExplosionMixin"
   ],
   "client": [
-    "client.EntityRenderDispatcherMixin",
-    "client.KeyboardMixin",
-    "client.LevelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

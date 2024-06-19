@@ -11,7 +11,6 @@ While it is mostly designed to be used in creative, but it works in survival (in
 Included libraries:
 - Rayon, licensed MIT ([LICENSE](https://github.com/LazuriteMC/Rayon/blob/1.20.1/LICENSE))
 - Toolbox, licensed MIT ([fabric.mod.json](https://github.com/LazuriteMC/Lazurite-Toolbox/blob/1.20.1/fabric/src/main/resources/fabric.mod.json#L15), stating license)
-- Transporter, licensed MIT ([LICENSE](https://github.com/LazuriteMC/Transporter/blob/1.20.1/LICENSE))
 
 [Youtube Showcase](https://youtu.be/X9-ZzTA2NfA)
 

@@ -14,7 +14,6 @@ import java.util.Optional;
  * in the case of immersive portals, it can be used to provide multiple
  * client Levels.
  * @see PhysicsThread
- * @see ClientLevelSupplier
  * @see ServerLevelSupplier
  */
 public interface LevelSupplier {

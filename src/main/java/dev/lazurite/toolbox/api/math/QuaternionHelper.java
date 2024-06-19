@@ -1,7 +1,6 @@
 package dev.lazurite.toolbox.api.math;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -96,27 +95,6 @@ public class QuaternionHelper {
      */
     public static Quaternionf fromTag(NbtCompound tag) {
         return new Quaternionf(tag.getFloat("i"), tag.getFloat("j"), tag.getFloat("k"), tag.getFloat("r"));
-    }
-
-    /**
-     * Serializes the given {@link Quaternionf} into a {@link PacketByteBuf}.
-     * @param buf  the {@link PacketByteBuf} to store the {@link Quaternionf} in
-     * @param quat the {@link Quaternionf} to store
-     */
-    public static void toBuffer(PacketByteBuf buf, Quaternionf quat) {
-        buf.writeFloat(quat.x());
-        buf.writeFloat(quat.y());
-        buf.writeFloat(quat.z());
-        buf.writeFloat(quat.w());
-    }
-
-    /**
-     * Deserializes the given {@link PacketByteBuf} into a new {@link Quaternionf}.
-     * @param buf the {@link PacketByteBuf} to retrieve the {@link Quaternionf} from
-     * @return the new {@link Quaternionf}
-     */
-    public static Quaternionf fromBuffer(PacketByteBuf buf) {
-        return new Quaternionf(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
     }
 
     /**

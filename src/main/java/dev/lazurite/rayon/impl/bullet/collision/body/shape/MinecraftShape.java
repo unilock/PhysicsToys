@@ -8,7 +8,6 @@ import com.jme3.bullet.collision.shapes.infos.IndexedMesh;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
-import dev.lazurite.transporter.api.pattern.Pattern;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.util.ArrayList;
@@ -38,22 +37,6 @@ public interface MinecraftShape {
 
     static Convex convex(BoundingBox box) {
         return new Convex(Triangle.getMeshOf(box));
-    }
-
-    static Convex convex(Pattern pattern) {
-        return new Convex(Triangle.getMeshOf(pattern));
-    }
-
-    static Concave concave(net.minecraft.util.math.Box box) {
-        return MinecraftShape.concave(Convert.toBullet(box));
-    }
-
-    static Concave concave(BoundingBox box) {
-        return new Concave(Triangle.getMeshOf(box));
-    }
-
-    static Concave concave(Pattern pattern) {
-        return new Concave(Triangle.getMeshOf(pattern));
     }
 
     /* Mostly stable */

@@ -1,5 +1,6 @@
 package dev.lazurite.rayon.impl.mixin.common.entity;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.lazurite.rayon.api.EntityPhysicsElement;
 import dev.lazurite.rayon.api.PhysicsElement;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
@@ -12,11 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Allows {@link PhysicsElement} objects to be affected by explosions.
@@ -31,10 +27,9 @@ public class ExplosionMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/entity/Entity;isImmuneToExplosion(Lnet/minecraft/world/explosion/Explosion;)Z"
-            ),
-            locals = LocalCapture.CAPTURE_FAILHARD
+            )
     )
-    public void collectBlocksAndDamageEntities(CallbackInfo ci, Set set, int i, float q, int k, int l, int r, int s, int t, int u, List list, Vec3d vec3, Iterator var12, Entity entity) {
+    public void collectBlocksAndDamageEntities(CallbackInfo ci, @Local Entity entity) {
         this.entity = entity;
     }
 

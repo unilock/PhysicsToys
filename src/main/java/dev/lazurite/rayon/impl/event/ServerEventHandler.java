@@ -14,13 +14,13 @@ import dev.lazurite.rayon.impl.bullet.collision.space.supplier.entity.ServerEnti
 import dev.lazurite.rayon.impl.bullet.collision.space.supplier.level.ServerLevelSupplier;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import dev.lazurite.rayon.impl.bullet.thread.PhysicsThread;
-import dev.lazurite.rayon.impl.bullet.thread.util.ClientUtil;
-import dev.lazurite.rayon.impl.event.network.EntityNetworking;
 import dev.lazurite.toolbox.api.event.ServerEvents;
-import dev.lazurite.toolbox.api.math.QuaternionHelper;
-import dev.lazurite.toolbox.api.math.VectorHelper;
-import dev.lazurite.toolbox.api.network.PacketRegistry;
-import dev.lazurite.toolbox.api.util.PlayerUtil;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
@@ -43,20 +43,20 @@ public final class ServerEventHandler {
         PhysicsSpaceEvents.ELEMENT_ADDED.register(ServerEventHandler::onElementAddedToSpace);
 
         // Server Events
-        ServerEvents.Lifecycle.LOAD_SERVER.register(ServerEventHandler::onServerStart);
-        ServerEvents.Lifecycle.UNLOAD_SERVER.register(ServerEventHandler::onServerStop);
-        ServerEvents.Tick.END_SERVER_TICK.register(ServerEventHandler::onServerTick);
+        ServerLifecycleEvents.SERVER_STARTING.register(ServerEventHandler::onServerStart);
+        ServerLifecycleEvents.SERVER_STOPPING.register(ServerEventHandler::onServerStop);
+        ServerTickEvents.END_SERVER_TICK.register(ServerEventHandler::onServerTick);
 
         // Level Events
-        ServerEvents.Lifecycle.LOAD_LEVEL.register(ServerEventHandler::onLevelLoad);
-        ServerEvents.Tick.START_LEVEL_TICK.register(ServerEventHandler::onStartLevelTick);
-        ServerEvents.Tick.START_LEVEL_TICK.register(ServerEventHandler::onEntityStartLevelTick);
+        ServerWorldEvents.LOAD.register(ServerEventHandler::onLevelLoad);
+        ServerTickEvents.START_WORLD_TICK.register(ServerEventHandler::onStartLevelTick);
+        ServerTickEvents.START_WORLD_TICK.register(ServerEventHandler::onEntityStartLevelTick);
         ServerEvents.Block.BLOCK_UPDATE.register(ServerEventHandler::onBlockUpdate);
 
         // Entity Events
-        ServerEvents.Entity.LOAD.register(ServerEventHandler::onEntityLoad);
-        ServerEvents.Entity.START_TRACKING.register(ServerEventHandler::onStartTrackingEntity);
-        ServerEvents.Entity.STOP_TRACKING.register(ServerEventHandler::onStopTrackingEntity);
+        ServerEntityEvents.ENTITY_LOAD.register(ServerEventHandler::onEntityLoad);
+        EntityTrackingEvents.START_TRACKING.register(ServerEventHandler::onStartTrackingEntity);
+        EntityTrackingEvents.STOP_TRACKING.register(ServerEventHandler::onStopTrackingEntity);
     }
 
     public static void onBlockUpdate(World level, BlockState blockState, BlockPos blockPos) {
@@ -78,9 +78,7 @@ public final class ServerEventHandler {
     }
 
     public static void onStartLevelTick(World level) {
-        if (!ClientUtil.isPaused()) {
-            MinecraftSpace.get(level).step();
-        }
+        MinecraftSpace.get(level).step();
     }
 
     public static void onLevelLoad(MinecraftServer server, ServerWorld level) {
@@ -96,8 +94,8 @@ public final class ServerEventHandler {
         }
     }
 
-    public static void onEntityLoad(Entity entity) {
-        if (EntityPhysicsElement.is(entity) && !PlayerUtil.tracking(entity).isEmpty()) {
+    public static void onEntityLoad(Entity entity, World world) {
+        if (EntityPhysicsElement.is(entity) && !PlayerLookup.tracking(entity).isEmpty()) {
             var space = MinecraftSpace.get(entity.getWorld());
             space.getWorkerThread().execute(() -> space.addCollisionObject(EntityPhysicsElement.get(entity).getRigidBody()));
         }
@@ -111,7 +109,7 @@ public final class ServerEventHandler {
     }
 
     public static void onStopTrackingEntity(Entity entity, ServerPlayerEntity player) {
-        if (EntityPhysicsElement.is(entity) && PlayerUtil.tracking(entity).isEmpty()) {
+        if (EntityPhysicsElement.is(entity) && PlayerLookup.tracking(entity).isEmpty()) {
             var space = MinecraftSpace.get(entity.getWorld());
             space.getWorkerThread().execute(() -> space.removeCollisionObject(EntityPhysicsElement.get(entity).getRigidBody()));
         }
@@ -122,47 +120,9 @@ public final class ServerEventHandler {
         EntityCollisionGenerator.step(space);
 
         for (var rigidBody : space.getRigidBodiesByClass(EntityRigidBody.class)) {
-            if (rigidBody.isActive()) {
-                /* Movement */
-                if (rigidBody.isPositionDirty()) {
-                    EntityNetworking.sendMovement(rigidBody);
-                }
-
-                /* Properties */
-                if (rigidBody.arePropertiesDirty()) {
-                    EntityNetworking.sendProperties(rigidBody);
-                }
-            }
-
             /* Set entity position */
             var location = rigidBody.getFrame().getLocation(new Vector3f(), 1.0f);
             rigidBody.getElement().cast().updatePosition(location.x, location.y, location.z);
-        }
-    }
-
-    public static void onMovementPacketReceived(PacketRegistry.ServerboundContext context) {
-        var buf = context.byteBuf();
-        var entityId = buf.readInt();
-        var rotation = Convert.toBullet(QuaternionHelper.fromBuffer(buf));
-        var location = Convert.toBullet(VectorHelper.fromBuffer(buf));
-        var linearVelocity = Convert.toBullet(VectorHelper.fromBuffer(buf));
-        var angularVelocity = Convert.toBullet(VectorHelper.fromBuffer(buf));
-        var player = context.player();
-        var level = player.getWorld();
-        var entity = level.getEntityById(entityId);
-
-        if (EntityPhysicsElement.is(entity)) {
-            var rigidBody = EntityPhysicsElement.get(entity).getRigidBody();
-
-            if (player.equals(rigidBody.getPriorityPlayer())) {
-                PhysicsThread.get(level).execute(() -> {
-                    rigidBody.setPhysicsRotation(rotation);
-                    rigidBody.setPhysicsLocation(location);
-                    rigidBody.setLinearVelocity(linearVelocity);
-                    rigidBody.setAngularVelocity(angularVelocity);
-                    rigidBody.activate();
-                });
-            }
         }
     }
 }

@@ -5,14 +5,10 @@ import dev.lazurite.rayon.impl.bullet.collision.body.shape.MinecraftShape;
 import dev.lazurite.rayon.impl.bullet.collision.space.MinecraftSpace;
 import dev.lazurite.rayon.impl.bullet.collision.space.block.BlockProperty;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
-import dev.lazurite.transporter.api.Disassembler;
-import dev.lazurite.transporter.api.pattern.Pattern;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -45,24 +41,6 @@ public interface ChunkCache {
                                 blockState.get(Properties.WATERLOGGED)
                         )
                 );
-    }
-
-    static Pattern genShapeForBlock(BlockView blockGetter, BlockPos blockPos, BlockState blockState) {
-        final var blockEntity = blockGetter.getBlockEntity(blockPos);
-        final var transformation = new MatrixStack();
-        transformation.scale(0.95f, 0.95f, 0.95f);
-        transformation.translate(-0.5f, -0.5f, -0.5f);
-
-        try {
-            if (blockEntity != null) {
-                return Disassembler.getBlockEntity(blockEntity, transformation);
-            } else {
-                return Disassembler.getBlock(blockState, transformation);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     void refreshAll();

@@ -4,7 +4,6 @@ import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
-import dev.lazurite.transporter.api.pattern.Pattern;
 import net.minecraft.util.shape.VoxelShape;
 import org.joml.Matrix4f;
 
@@ -90,27 +89,6 @@ public class Triangle {
         for (int i = 0; i < points.length; i += 3) {
             consumer.accept(new Triangle(points[i].add(offset), points[i + 1].add(offset), points[i + 2].add(offset)));
         }
-    }
-
-    public static List<Triangle> getMeshOf(Pattern pattern) {
-        final var triangles = new ArrayList<Triangle>();
-
-        for (var quad : pattern.getQuads()) {
-            final var centroid = new Vector3f();
-
-            for (var point : quad.getPoints()) {
-                centroid.addLocal(Convert.toBullet(point));
-            }
-
-            centroid.divideLocal(4);
-
-            triangles.add(new Triangle(Convert.toBullet(quad.getPoints().get(0)), centroid, Convert.toBullet(quad.getPoints().get(1))));
-            triangles.add(new Triangle(Convert.toBullet(quad.getPoints().get(1)), centroid, Convert.toBullet(quad.getPoints().get(2))));
-            triangles.add(new Triangle(Convert.toBullet(quad.getPoints().get(2)), centroid, Convert.toBullet(quad.getPoints().get(3))));
-            triangles.add(new Triangle(Convert.toBullet(quad.getPoints().get(3)), centroid, Convert.toBullet(quad.getPoints().get(0))));
-        }
-
-        return triangles;
     }
 
     public Triangle(Vector3f v1, Vector3f v2, Vector3f v3) {

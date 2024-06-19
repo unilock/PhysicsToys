@@ -1,7 +1,6 @@
 package dev.lazurite.toolbox.api.math;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
@@ -72,30 +71,6 @@ public class VectorHelper {
                 tag.getFloat("x"),
                 tag.getFloat("y"),
                 tag.getFloat("z")
-        );
-    }
-
-    /**
-     * Stuffs a {@link Vector3f} into a {@link PacketByteBuf}.
-     * @param buf the buffer to stuff into
-     * @param vec the vector to stuff
-     */
-    public static void toBuffer(PacketByteBuf buf, Vector3f vec) {
-        buf.writeFloat(vec.x());
-        buf.writeFloat(vec.y());
-        buf.writeFloat(vec.z());
-    }
-
-    /**
-     * Unpacks a {@link Vector3f} from a {@link PacketByteBuf}.
-     * @param buf the buffer to unpack from
-     * @return the newly unpacked vector
-     */
-    public static Vector3f fromBuffer(PacketByteBuf buf) {
-        return new Vector3f(
-                buf.readFloat(),
-                buf.readFloat(),
-                buf.readFloat()
         );
     }
 }

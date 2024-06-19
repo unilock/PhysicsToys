@@ -63,7 +63,6 @@ dependencies {
 	modImplementation include("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
 
 	implementation include("com.github.stephengold:Libbulletjme:17.5.4")
-	modCompileOnly "maven.modrinth:sodium:mc1.20.4-0.5.8"
 }
 
 
