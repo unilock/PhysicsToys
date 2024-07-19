@@ -69,8 +69,8 @@ public class DataGenInit implements DataGeneratorEntrypoint {
     }
 
     private static class LootTables extends FabricBlockLootTableProvider {
-        protected LootTables(FabricDataOutput dataOutput) {
-            super(dataOutput);
+        protected LootTables(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+            super(dataOutput, registryLookup);
         }
 
         @Override
@@ -80,8 +80,8 @@ public class DataGenInit implements DataGeneratorEntrypoint {
     }
 
     private static class Recipes extends FabricRecipeProvider {
-        public Recipes(FabricDataOutput output) {
-            super(output);
+        public Recipes(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+            super(output, registriesFuture);
         }
 
         @Override

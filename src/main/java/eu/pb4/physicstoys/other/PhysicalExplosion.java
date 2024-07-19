@@ -53,7 +53,7 @@ public class PhysicalExplosion extends Explosion {
 
     @Override
     public void affectWorld(boolean particles) {
-        this.world.playSound(this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F, false);
+        this.world.playSound(this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE.value(), SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F, false);
 
         boolean bl = this.shouldDestroy();
         ((ServerWorld) this.world).spawnParticles(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 0, 1.0D, 0.0D, 0.0D, 1);

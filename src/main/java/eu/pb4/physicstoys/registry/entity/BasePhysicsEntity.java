@@ -161,7 +161,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
     }
 
     @Override
-    public boolean canUsePortals() {
+    public boolean canUsePortals(boolean allowVehicles) {
         return true;
     }
 
@@ -227,16 +227,17 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
     }
 
     @Override
-    protected void initDataTracker() {}
+    protected void initDataTracker(DataTracker.Builder builder) {}
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         if (this.owner != null) {
             nbt.put("Owner", NbtHelper.fromUuid(this.owner));
         }
-        if (this.ownerProfile != null) {
-            nbt.put("OwnerProfile", NbtHelper.writeGameProfile(new NbtCompound(), this.ownerProfile));
-        }
+        // TODO
+        //if (this.ownerProfile != null) {
+        //    nbt.put("OwnerProfile", NbtHelper.writeGameProfile(new NbtCompound(), this.ownerProfile));
+        //}
     }
 
     @Override
@@ -246,7 +247,13 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
         }
 
         if (nbt.contains("OwnerProfile")) {
-            this.ownerProfile = NbtHelper.toGameProfile(nbt.getCompound("OwnerProfile"));
+            // TODO
+            if (this.getServer() != null && this.getServer().getUserCache() != null) {
+                this.ownerProfile = this.getServer().getUserCache().getByUuid(this.owner).orElse(null);
+            } else {
+                this.ownerProfile = null;
+            }
+            //this.ownerProfile = NbtHelper.toGameProfile(nbt.getCompound("OwnerProfile"));
         }
     }
 
@@ -270,7 +277,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
 
     public void setOwner(UUID owner) {
         this.owner = owner;
-        this.ownerProfile = new GameProfile(owner, null);
+        this.ownerProfile = new GameProfile(owner, "null");
     }
 
     public void setOwner(GameProfile ownerProfile) {

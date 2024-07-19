@@ -12,6 +12,6 @@ Included libraries:
 - Rayon, licensed MIT ([LICENSE](https://github.com/LazuriteMC/Rayon/blob/1.20.1/LICENSE))
 - Toolbox, licensed MIT ([fabric.mod.json](https://github.com/LazuriteMC/Lazurite-Toolbox/blob/1.20.1/fabric/src/main/resources/fabric.mod.json#L15), stating license)
 
-[Youtube Showcase](https://youtu.be/X9-ZzTA2NfA)
+[YouTube Showcase](https://youtu.be/X9-ZzTA2NfA)
 
 ## [Download from Modrinth](https://modrinth.com/mod/physics-toys)
