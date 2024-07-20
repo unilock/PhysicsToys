@@ -12,10 +12,12 @@ import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import eu.pb4.polymer.core.api.item.PolymerBlockItem;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
+import eu.pb4.polymer.core.api.other.PolymerComponent;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.Item;
@@ -25,6 +27,9 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
+import net.minecraft.util.Uuids;
+
+import java.util.UUID;
 
 public class USRegistry {
     public static final EntityType<BlockPhysicsEntity> BLOCK_ENTITY = register("block", EntityType.Builder.create(BlockPhysicsEntity::new, SpawnGroup.MISC).maxTrackingRange(7).trackingTickInterval(1).build(), Registries.ENTITY_TYPE);
@@ -56,11 +61,15 @@ public class USRegistry {
             })
             .build();
 
+    public static final ComponentType<UUID> TARGET_COMPONENT = register("held_entity", ComponentType.<UUID>builder().codec(Uuids.CODEC).packetCodec(Uuids.PACKET_CODEC).build(), Registries.DATA_COMPONENT_TYPE);
+
     public static <A extends T, T> A register(String key, A value, Registry<T> registry) {
         if (value instanceof BlockEntityType<?> blockEntityType) {
             PolymerBlockUtils.registerBlockEntity(blockEntityType);
         } else if (value instanceof EntityType<?> entityType) {
             PolymerEntityUtils.registerType(entityType);
+        } else if (value instanceof ComponentType<?> componentType) {
+            PolymerComponent.registerDataComponent(componentType);
         }
         return Registry.register(registry, PhysicsToysMod.id(key), value);
     }
