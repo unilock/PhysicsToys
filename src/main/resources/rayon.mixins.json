@@ -6,7 +6,6 @@
   "mixins": [
     "common.LevelMixin",
     "common.entity.EntityMixin",
-    "common.entity.EntityTrackerEntryMixin",
     "common.entity.ExplosionMixin"
   ],
   "client": [

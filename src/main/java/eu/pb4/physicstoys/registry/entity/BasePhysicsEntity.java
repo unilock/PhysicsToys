@@ -104,19 +104,8 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
         if (this.mainDisplayElement.isDirty()) {
             this.mainDisplayElement.startInterpolation();
         }
-        var vec = this.getPhysicsLocation(new Vector3f(), 0);
-        var oldPos = new Vec3d(vec.x, vec.y, vec.z);
-        vec = this.getPhysicsLocation(vec, 1);
-        var nextPos = new Vec3d(vec.x, vec.y, vec.z);
 
-        var movePacket = VirtualEntityUtils.createMovePacket(this.getId(), oldPos, nextPos, false, 0, 0);
         this.holder.tick();
-
-        if (movePacket != null) {
-            for (var x : listeners) {
-                x.sendPacket(movePacket);
-            }
-        }
     }
 
     @Override
