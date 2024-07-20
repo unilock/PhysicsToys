@@ -1,9 +1,9 @@
-// 1.20.4	2024-06-19T15:40:19.803085748	Physics Toys/Recipes
-65559edaab32390e4016651ee27394ad74909589 data/physics_toys/advancements/recipes/redstone/tnt_cannon.json
-62f3ac0ab01ab821febe3ec8a6cc6d8ef3954440 data/physics_toys/advancements/recipes/redstone/baseball_bat.json
-9c63ade60ad1e5bf53a34d5f3d44d16b3927839c data/physics_toys/recipes/tnt.json
-19a8ff6ea415bd7f08cbb3e0ec6e6926ed5bd03b data/physics_toys/recipes/baseball_bat.json
-9feea89df4f399fbb239761ab20e09ee0deaf3c2 data/physics_toys/recipes/gravity_gun.json
-b13d36eed43b5d25e19cf582f6c52c0f2e811e16 data/physics_toys/advancements/recipes/redstone/tnt.json
-f27f643702b176a1a5bf5d341592b6bc3ed03821 data/physics_toys/recipes/tnt_cannon.json
-cac8b0ba9bc4043f53ca11279927df770e3a9c8e data/physics_toys/advancements/recipes/redstone/gravity_gun.json
+// 1.21	2024-07-20T07:45:51.818894164	Physics Toys/Recipes
+309eb64b9643e99b4e8b2a8baa61441a737f3b07 data/physics_toys/advancement/recipes/redstone/tnt_cannon.json
+45972b16bc47e43eee2126180130fd3b547579d6 data/physics_toys/advancement/recipes/redstone/tnt.json
+31106742e8891d380b8357e963721557bca8c1c6 data/physics_toys/advancement/recipes/redstone/gravity_gun.json
+b5d4fef7515d460c1590944b88cda939099632c5 data/physics_toys/recipe/tnt_cannon.json
+e32d2c623472e7f2b5ee11843ed11f7f5255b236 data/physics_toys/advancement/recipes/redstone/baseball_bat.json
+9e213e623bf6db3efc15a2993d03d06e5399f61a data/physics_toys/recipe/gravity_gun.json
+9a65eea5e25e85cc39a55d415e21040d11075e5b data/physics_toys/recipe/baseball_bat.json
+2d2e638b6ea03b324f7338ee8d7357b41e833aad data/physics_toys/recipe/tnt.json

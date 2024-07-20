@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "physics_toys:gravity_gun"
-            ]
+            "items": "minecraft:tnt"
           }
         ]
       },
@@ -15,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "physics_toys:baseball_bat"
+        "recipe": "physics_toys:tnt"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "physics_toys:baseball_bat"
+      "physics_toys:tnt"
     ]
   }
 }

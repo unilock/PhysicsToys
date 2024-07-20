@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "physics_toys:gravity_gun"
-            ]
+            "items": "physics_toys:gravity_gun"
           }
         ]
       },

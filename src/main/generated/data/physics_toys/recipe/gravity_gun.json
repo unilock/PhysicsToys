@@ -2,19 +2,22 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
+    "a": {
+      "item": "minecraft:ender_eye"
+    },
     "i": {
-      "item": "minecraft:stick"
+      "item": "minecraft:nether_star"
     },
     "p": {
       "tag": "minecraft:planks"
     }
   },
   "pattern": [
-    " p ",
-    "ipi",
-    " i "
+    "pia",
+    "p  "
   ],
   "result": {
-    "item": "physics_toys:baseball_bat"
+    "count": 1,
+    "id": "physics_toys:gravity_gun"
   }
 }
