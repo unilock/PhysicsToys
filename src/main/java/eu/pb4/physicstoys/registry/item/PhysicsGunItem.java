@@ -14,7 +14,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
@@ -72,20 +71,20 @@ public class PhysicsGunItem extends Item implements PolymerItem, PhysicsEntityIn
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         var stack = user.getStackInHand(hand);
-        if (stack.hasNbt() && stack.getNbt().contains(TARGET_NBT)) {
-            var pickTime = stack.getNbt().getLong(PICK_TIME_NBT);
+        if (stack.contains(USRegistry.TARGET_COMPONENT)) {
+            var pickTime = stack.getOrDefault(USRegistry.PICK_TIME_COMPONENT, 0L);
             if (world.getTime() - pickTime < 5) {
                 return TypedActionResult.fail(stack);
             }
 
-            var target = ((ServerWorld) world).getEntity(NbtHelper.toUuid(stack.getNbt().get(TARGET_NBT)));
+            var target = ((ServerWorld) world).getEntity(stack.get(USRegistry.TARGET_COMPONENT));
             if (target instanceof BasePhysicsEntity basePhysics) {
                 basePhysics.getRigidBody().activate();
                 basePhysics.setHolder(null);
-                stack.getNbt().remove(TARGET_NBT);
+                stack.remove(USRegistry.TARGET_COMPONENT);
                 return TypedActionResult.success(stack, true);
             }
-            stack.getNbt().remove(TARGET_NBT);
+            stack.remove(USRegistry.TARGET_COMPONENT);
         }
 
         return TypedActionResult.fail(stack);
@@ -99,7 +98,7 @@ public class PhysicsGunItem extends Item implements PolymerItem, PhysicsEntityIn
 
         var blockState = context.getWorld().getBlockState(context.getBlockPos());
         context.getWorld().setBlockState(context.getBlockPos(), Blocks.AIR.getDefaultState());
-        context.getStack().getNbt().putLong(PICK_TIME_NBT, context.getWorld().getTime());
+        context.getStack().set(USRegistry.PICK_TIME_COMPONENT, context.getWorld().getTime());
 
         if (blockState.isOf(USRegistry.PHYSICAL_TNT_BLOCK)) {
             var vec = Vec3d.ofCenter(context.getBlockPos());
@@ -135,7 +134,7 @@ public class PhysicsGunItem extends Item implements PolymerItem, PhysicsEntityIn
 
             stack.set(USRegistry.TARGET_COMPONENT, basePhysics.getUuid());
             basePhysics.setHolder(player);
-            stack.getNbt().putLong(PICK_TIME_NBT, player.world.getTime());
+            stack.set(USRegistry.PICK_TIME_COMPONENT, player.getWorld().getTime());
         }
     }
 

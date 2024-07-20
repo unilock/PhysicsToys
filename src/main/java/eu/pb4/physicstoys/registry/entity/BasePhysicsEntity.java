@@ -31,6 +31,7 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -258,8 +259,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
             if (stack.getItem() instanceof PhysicsEntityInteractor physicsGunItem) {
                 physicsGunItem.onAttackWith(player, stack, this);
             } else {
-                // TODO
-                var x = EnchantmentHelper.getLevel(Enchantments.KNOCKBACK, player.getWeaponStack());
+                var x = EnchantmentHelper.getLevel(player.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK).orElseThrow(), stack);
                 this.getRigidBody().applyCentralImpulse(Convert.toBullet(player.getRotationVec(0)).mult((x + 1) * 30));
             }
         }

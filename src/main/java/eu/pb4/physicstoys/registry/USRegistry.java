@@ -1,5 +1,6 @@
 package eu.pb4.physicstoys.registry;
 
+import com.mojang.serialization.Codec;
 import eu.pb4.physicstoys.PhysicsToysMod;
 import eu.pb4.physicstoys.registry.block.PhysicalTntBlock;
 import eu.pb4.physicstoys.registry.entity.BlockPhysicsEntity;
@@ -24,6 +25,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
@@ -62,6 +64,7 @@ public class USRegistry {
             .build();
 
     public static final ComponentType<UUID> TARGET_COMPONENT = register("held_entity", ComponentType.<UUID>builder().codec(Uuids.CODEC).packetCodec(Uuids.PACKET_CODEC).build(), Registries.DATA_COMPONENT_TYPE);
+    public static final ComponentType<Long> PICK_TIME_COMPONENT = register("pick_time", ComponentType.<Long>builder().codec(Codec.LONG).packetCodec(PacketCodecs.VAR_LONG).build(), Registries.DATA_COMPONENT_TYPE);
 
     public static <A extends T, T> A register(String key, A value, Registry<T> registry) {
         if (value instanceof BlockEntityType<?> blockEntityType) {
@@ -76,5 +79,5 @@ public class USRegistry {
 
     public static void register() {
         PolymerItemGroupUtils.registerPolymerItemGroup(PhysicsToysMod.id("item_group"), ITEM_GROUP);
-    };
+    }
 }
