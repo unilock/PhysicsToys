@@ -6,6 +6,7 @@ import dev.lazurite.rayon.api.EntityPhysicsElement;
 import dev.lazurite.rayon.impl.bullet.collision.body.ElementRigidBody;
 import dev.lazurite.rayon.impl.bullet.collision.body.EntityRigidBody;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
+import eu.pb4.physicstoys.PhysicsToysMod;
 import eu.pb4.physicstoys.registry.item.PhysicsEntityInteractor;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
@@ -13,12 +14,17 @@ import eu.pb4.polymer.virtualentity.api.VirtualEntityUtils;
 import eu.pb4.polymer.virtualentity.api.attachment.EntityAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.DisplayElement;
 import eu.pb4.polymer.virtualentity.api.elements.InteractionElement;
+import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
+import eu.pb4.polymer.virtualentity.api.tracker.InteractionTrackedData;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Ownable;
 import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.decoration.Brightness;
+import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
@@ -29,6 +35,7 @@ import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
@@ -59,6 +66,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
     protected final DisplayElement mainDisplayElement = this.createMainDisplayElement();
     protected final InteractionElement interactionElement = InteractionElement.redirect(this);
     protected final InteractionElement interactionElement2 = InteractionElement.redirect(this);
+    private final TextDisplayElement debugText;
     protected PlayerEntity holdingPlayer;
 
 
@@ -73,12 +81,27 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
         this.rigidBody = new EntityRigidBody(this);
         this.rigidBody.setMass(10);
         this.rigidBody.setBuoyancyType(ElementRigidBody.BuoyancyType.WATER);
-        this.interactionElement.setSize(1f, 0.5f);
-        this.interactionElement2.setSize(1f, -0.5f);
+        var w = this.getInteractionWidth();
+        var h = this.getInteractionHeight() / 2;
+        this.interactionElement.setSize(w, h);
+        this.interactionElement2.setSize(w, -h);
 
         this.holder.addElement(this.mainDisplayElement);
         this.holder.addElement(this.interactionElement);
         this.holder.addElement(this.interactionElement2);
+
+        if (PhysicsToysMod.IS_DEV && false) {
+            this.debugText = new TextDisplayElement();
+            this.debugText.setDisplayHeight(5);
+            this.debugText.setDisplayWidth(5);
+            this.debugText.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
+            this.debugText.setBrightness(new Brightness(15, 15));
+            this.debugText.setTranslation(new org.joml.Vector3f(0, h + 0.2f, 0));
+            VirtualEntityUtils.addVirtualPassenger(this, this.debugText.getEntityId());
+            this.holder.addElement(this.debugText);
+        } else {
+            this.debugText = null;
+        }
 
         this.mainDisplayElement.setInterpolationDuration(type.getTrackTickInterval());
 
@@ -89,6 +112,10 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
         this.attachment = new EntityAttachment(this.holder, this, false);
     }
 
+    protected abstract float getInteractionWidth();
+
+    protected abstract float getInteractionHeight();
+
     @Override
     public void setPosition(double x, double y, double z) {
         super.setPosition(x, y, z);
@@ -97,15 +124,32 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
     @Override
     public void onEntityTrackerTick(Set<PlayerAssociatedNetworkHandler> listeners) {
         var rot = Convert.toMinecraft(this.getPhysicsRotation(this.storedQuad, 0));
-        var trans = new org.joml.Vector3f(-0.5f, -0.5f, -0.5f).rotate(rot);
+        var trans = this.getBaseTranslation().rotate(rot);
         this.mainDisplayElement.setLeftRotation(rot);
         this.mainDisplayElement.setTranslation(trans);
+
+        if (this.debugText != null) {
+            var dbg = Text.empty()
+                    .append(Text.literal("Mass: " + this.getRigidBody().getMass()))
+                    .append(Text.literal("\nBuoyancy: " + this.getRigidBody().getBuoyancyType().name()));
+
+            this.addDebugText((t) -> dbg.append("\n").append(t));
+
+            this.debugText.setText(dbg);
+        }
 
         if (this.mainDisplayElement.isDirty()) {
             this.mainDisplayElement.startInterpolation();
         }
 
         this.holder.tick();
+    }
+
+    protected org.joml.Vector3f getBaseTranslation() {
+        return new org.joml.Vector3f();
+    }
+
+    protected void addDebugText(Consumer<Text> consumer) {
     }
 
     @Override
@@ -120,7 +164,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
 
     @Override
     public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
-        return EntityType.ARMOR_STAND;
+        return EntityType.INTERACTION;
     }
 
     @Override
@@ -130,11 +174,14 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
 
     @Override
     public void modifyRawTrackedData(List<DataTracker.SerializedEntry<?>> data, ServerPlayerEntity player, boolean initial) {
+        var empty = data.isEmpty();
         data.clear();
-        if (initial) {
-            data.add(DataTracker.SerializedEntry.of(EntityTrackedData.NO_GRAVITY, true));
-            data.add(DataTracker.SerializedEntry.of(ArmorStandEntity.ARMOR_STAND_FLAGS, (byte) ArmorStandEntity.MARKER_FLAG));
-            data.add(DataTracker.SerializedEntry.of(EntityTrackedData.SILENT, true));
+        if (initial || empty) {
+            //data.add(DataTracker.SerializedEntry.of(EntityTrackedData.NO_GRAVITY, true));
+            //data.add(DataTracker.SerializedEntry.of(ArmorStandEntity.ARMOR_STAND_FLAGS, (byte) ArmorStandEntity.MARKER_FLAG));
+            //data.add(DataTracker.SerializedEntry.of(EntityTrackedData.SILENT, true));
+            data.add(DataTracker.SerializedEntry.of(InteractionTrackedData.HEIGHT, 0f));
+            data.add(DataTracker.SerializedEntry.of(InteractionTrackedData.WIDTH, 0f));
             data.add(DataTracker.SerializedEntry.of(EntityTrackedData.FLAGS, (byte) (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX)));
         }
     }
@@ -210,6 +257,10 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
 
             if (stack.getItem() instanceof PhysicsEntityInteractor physicsGunItem) {
                 physicsGunItem.onAttackWith(player, stack, this);
+            } else {
+                // TODO
+                var x = EnchantmentHelper.getLevel(Enchantments.KNOCKBACK, player.getWeaponStack());
+                this.getRigidBody().applyCentralImpulse(Convert.toBullet(player.getRotationVec(0)).mult((x + 1) * 30));
             }
         }
         return super.handleAttack(attacker);

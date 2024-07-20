@@ -5,6 +5,7 @@ import dev.lazurite.rayon.impl.bullet.collision.body.ElementRigidBody;
 import dev.lazurite.rayon.impl.bullet.collision.body.shape.MinecraftShape;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import eu.pb4.common.protection.api.CommonProtection;
+import eu.pb4.physicstoys.other.ShapeUtil;
 import eu.pb4.physicstoys.registry.PhysicsTags;
 import eu.pb4.physicstoys.registry.USRegistry;
 import eu.pb4.polymer.virtualentity.api.elements.BlockDisplayElement;
@@ -24,6 +25,7 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -31,19 +33,15 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-import java.util.IdentityHashMap;
+import java.util.function.Consumer;
 
 public class BlockPhysicsEntity extends BasePhysicsEntity {
-    private static final IdentityHashMap<BlockState, MinecraftShape.Convex> SHAPE_MAP = new IdentityHashMap<>();
-    private static final MinecraftShape.Convex DEFAULT_SHAPE = MinecraftShape.convex(new Box(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5));
-
     private BlockState currentBlockState = Blocks.AIR.getDefaultState();
     private int despawnTimerValue = -1;
     private int despawnTimer;
 
     public BlockPhysicsEntity(EntityType<BlockPhysicsEntity> type, World world) {
         super(type, world);
-        //SHULKER.setInvisible(true);
     }
 
     public static BlockPhysicsEntity create(World world, BlockState state, BlockPos pos) {
@@ -65,6 +63,16 @@ public class BlockPhysicsEntity extends BasePhysicsEntity {
     }
 
     @Override
+    protected float getInteractionWidth() {
+        return 1.1f;
+    }
+
+    @Override
+    protected float getInteractionHeight() {
+        return 1.1f;
+    }
+
+    @Override
     public boolean isCollidable() {
         return false;
     }
@@ -74,15 +82,20 @@ public class BlockPhysicsEntity extends BasePhysicsEntity {
             return;
         }
         ((BlockDisplayElement) this.mainDisplayElement).setBlockState(state);
-        var x = (float) Math.min(Math.max(12f * Math.log(state.getBlock().getHardness()), 4), 50);
+        this.currentBlockState = state;
+        this.recalculateProperties();
+        this.updateBody();
+    }
+
+    protected void recalculateProperties() {
+        var x = (float) Math.min(Math.max(12f * Math.log1p(Math.max(this.currentBlockState.getBlock().getHardness(), this.currentBlockState.getBlock().getBlastResistance())), 5), 50);
 
         if (x < 0 || Float.isNaN(x)) {
             x = 60;
         }
+
         this.getRigidBody().setMass(x);
-        this.getRigidBody().setBuoyancyType(state.isIn(PhysicsTags.IS_FLOATING_ON_WATER) ? ElementRigidBody.BuoyancyType.WATER : ElementRigidBody.BuoyancyType.NONE);
-        this.currentBlockState = state;
-        this.updateBody();
+        this.getRigidBody().setBuoyancyType(this.currentBlockState.isIn(PhysicsTags.IS_FLOATING_ON_WATER) ? ElementRigidBody.BuoyancyType.WATER : ElementRigidBody.BuoyancyType.NONE);
     }
 
     @Override
@@ -91,6 +104,12 @@ public class BlockPhysicsEntity extends BasePhysicsEntity {
         nbt.putInt("DespawnTimerValue", this.despawnTimerValue);
         nbt.putInt("DespawnTimer", this.despawnTimer);
         super.writeCustomDataToNbt(nbt);
+    }
+
+    @Override
+    protected void addDebugText(Consumer<Text> consumer) {
+        consumer.accept(Text.literal("DespawnTimer: " + this.despawnTimer + "/" +  this.despawnTimerValue));
+        consumer.accept(Text.literal("Damage: " + this.calculateDamage(this.getRigidBody().getFrame().getLocationDelta(new Vector3f()))));
     }
 
     @Override
@@ -109,26 +128,9 @@ public class BlockPhysicsEntity extends BasePhysicsEntity {
     @Override
     public MinecraftShape.Convex createShape() {
         if (this.currentBlockState == null) {
-            return DEFAULT_SHAPE;
+            return ShapeUtil.CUBE;
         }
-
-        var shape = SHAPE_MAP.get(this.currentBlockState);
-        if (shape == null) {
-            Box box;
-            var a = currentBlockState.getCollisionShape(this.getWorld(), BlockPos.ORIGIN);
-            if (a.isEmpty()) {
-                box = currentBlockState.getOutlineShape(this.getWorld(), BlockPos.ORIGIN).getBoundingBox();
-            } else {
-                box = currentBlockState.getCollisionShape(this.getWorld(), BlockPos.ORIGIN).getBoundingBox();
-            }
-
-            box = box.shrink(box.getLengthX() * 0.15, box.getLengthY() * 0.15, box.getLengthZ() * 0.15);
-            shape = MinecraftShape.convex(box);
-
-            SHAPE_MAP.put(this.currentBlockState, shape);
-        }
-
-        return shape;
+        return ShapeUtil.getBlockShape(this.currentBlockState, this.getWorld(), BlockPos.ORIGIN);
     }
 
     @Override
@@ -142,16 +144,19 @@ public class BlockPhysicsEntity extends BasePhysicsEntity {
             var col = ProjectileUtil.getEntityCollision(this.getWorld(), this, vec1, new Vec3d(tmp.x, tmp.y, tmp.z), this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D), Entity::canBeHitByProjectile);
 
             if (col != null) {
-                var source = this.getOwner() instanceof PlayerEntity player ? this.getWorld().getDamageSources().playerAttack(player) : this.getWorld().getDamageSources().fallingBlock(this);
+                var d =  this.calculateDamage(delta);
 
-                col.getEntity().damage(source, Math.max((delta.length()) * this.getRigidBody().getMass() * (this.holdingPlayer != null ? 0.15f : 0.28f), 0));
+                if (d > 0.2) {
+                    var source = this.getOwner() instanceof PlayerEntity player ? this.getWorld().getDamageSources().playerAttack(player) : this.getWorld().getDamageSources().fallingBlock(this);
+                    col.getEntity().damage(source, d);
+                }
             }
         }
 
         if (this.holdingPlayer != null) {
             this.despawnTimer = this.despawnTimerValue;
         } else if (this.despawnTimerValue != -1) {
-            if (delta.lengthSquared() < 0.01f) {
+            if (delta.lengthSquared() < 0.005f) {
                 this.despawnTimer--;
 
                 if (this.despawnTimer <= 0) {
@@ -178,6 +183,15 @@ public class BlockPhysicsEntity extends BasePhysicsEntity {
             }
         }
 
+    }
+
+    private float calculateDamage(Vector3f delta) {
+        return Math.max((delta.length()) * this.getRigidBody().getMass() * (this.holdingPlayer != null ? 0.15f : 0.28f), 0);
+    }
+
+    @Override
+    protected org.joml.Vector3f getBaseTranslation() {
+        return new org.joml.Vector3f(-0.5f, -0.5f, -0.5f);
     }
 
     @Override

@@ -43,8 +43,6 @@ repositories {
 	// for more information about repositories.
 	maven { url 'https://maven.nucleoid.xyz' }
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-	maven { url "https://lazurite.dev/releases" }
-	maven { url "https://api.modrinth.com/maven" }
 	mavenLocal()
 }
 
