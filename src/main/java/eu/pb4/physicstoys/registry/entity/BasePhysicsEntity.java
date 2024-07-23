@@ -28,6 +28,7 @@ import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
@@ -39,6 +40,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -274,10 +276,9 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
         if (this.owner != null) {
             nbt.put("Owner", NbtHelper.fromUuid(this.owner));
         }
-        // TODO
-        //if (this.ownerProfile != null) {
-        //    nbt.put("OwnerProfile", NbtHelper.writeGameProfile(new NbtCompound(), this.ownerProfile));
-        //}
+        if (this.ownerProfile != null) {
+            nbt.put("OwnerProfile", Codecs.GAME_PROFILE_WITH_PROPERTIES.encodeStart(NbtOps.INSTANCE, this.ownerProfile).getOrThrow());
+        }
     }
 
     @Override
@@ -287,13 +288,7 @@ public abstract class BasePhysicsEntity extends Entity implements PolymerEntity,
         }
 
         if (nbt.contains("OwnerProfile")) {
-            // TODO
-            if (this.getServer() != null && this.getServer().getUserCache() != null) {
-                this.ownerProfile = this.getServer().getUserCache().getByUuid(this.owner).orElse(null);
-            } else {
-                this.ownerProfile = null;
-            }
-            //this.ownerProfile = NbtHelper.toGameProfile(nbt.getCompound("OwnerProfile"));
+            this.ownerProfile = Codecs.GAME_PROFILE_WITH_PROPERTIES.parse(NbtOps.INSTANCE, nbt.getCompound("OwnerProfile")).getOrThrow();
         }
     }
 
